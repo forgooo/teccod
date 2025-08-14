@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  opensearch:
+    image: opensearchproject/opensearch:2.15.0
+    container_name: opensearch
+    environment:
+      - discovery.type=single-node
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=Mango!Tree42Safe
+      - OPENSEARCH_JAVA_OPTS=-Xms384m -Xmx384m
+      - plugins.security.disabled=true
+    ports:
+      - "9200:9200"
+      - "9600:9600"
+    volumes:
+      - opensearch-data:/usr/share/opensearch/data
+    mem_limit: 768m
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9200"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 60s   # даем больше времени на старт при низкой памяти
+    command: >
+      bash -c "
+      ./bin/opensearch-plugin install --batch opensearch-performance-analyzer || true &&
+      ./opensearch-docker-entrypoint.sh
+      "
+
+  web-app:
+    build: .
+    container_name: web-app
+    ports:
+      - "8000:8000"
+    depends_on:
+      opensearch:
+        condition: service_healthy
+    environment:
+      - OPENSEARCH_HOST=opensearch
+      - OPENSEARCH_PORT=9200
+    restart: on-failure
+
+volumes:
+  opensearch-data:

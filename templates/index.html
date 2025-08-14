@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>OpenSearch Demo</title>
+</head>
+<body>
+    <h1>Search Documents</h1>
+    <form method="POST">
+        <label for="keyword">Keyword:</label>
+        <input type="text" id="keyword" name="keyword" value="{{ keyword }}">
+        <br><br>
+        <label>Content Type:</label><br>
+        {% for type in content_types %}
+            <input type="radio" id="{{ type }}" name="content_type" value="{{ type }}" {% if selected_type == type %}checked{% endif %}>
+            <label for="{{ type }}">{{ type.capitalize() }}</label><br>
+        {% endfor %}
+        <input type="radio" id="none" name="content_type" value="" {% if not selected_type %}checked{% endif %}>
+        <label for="none">None</label><br>
+        <br>
+        <input type="submit" value="Search">
+    </form>
+    
+    <h2>Results:</h2>
+    {% if results %}
+        <ul>
+            {% for result in results %}
+                <li>
+                    <strong>{{ result.title }}</strong><br>
+                    {{ result.snippet }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No results found.</p>
+    {% endif %}
+</body>
+</html>
